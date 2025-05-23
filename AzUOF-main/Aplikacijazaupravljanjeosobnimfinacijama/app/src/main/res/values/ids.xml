@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="welcomeText" type="id" />
+    <item name="nav_view" type="id" />
+    <item name="drawer_layout" type="id" />
+    <item name="nav_home" type="id" />
+    <item name="nav_logout" type="id" />
+    <item name="tvDate" type="id" />
+    <item name="rvIncomeList" type="id" />
+</resources>

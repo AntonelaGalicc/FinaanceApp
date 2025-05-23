@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Tema aplikacije -->
+    <style name="Theme.AplikacijaZaUpravljanjeOsobnimFinacijama" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primarne boje -->
+        <item name="colorPrimary">#00BCD4</item>
+        <item name="colorPrimaryVariant">#0097A7</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <!-- Sekundarne boje ako zatrebaju -->
+        <item name="colorSecondary">#00ACC1</item>
+        <item name="colorSecondaryVariant">#00838F</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <!-- Boje za status bar i navigaciju -->
+        <item name="android:statusBarColor">#0097A7</item>
+        <item name="android:navigationBarColor">#00BCD4</item>
+
+        <!-- Default background -->
+        <item name="android:windowBackground">#FFFFFF</item>
+
+        <!-- Koristi moderne UI komponente -->
+        <item name="android:editTextBackground">@android:color/transparent</item>
+    </style>
+
+</resources>

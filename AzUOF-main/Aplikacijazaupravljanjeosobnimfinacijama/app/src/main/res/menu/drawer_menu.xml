@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/dashboard"
+        android:icon="@drawable/dashboard"
+        android:title="Početna" />
+
+    <item
+        android:id="@+id/income"
+        android:icon="@drawable/income"
+        android:title="Prihodi" />
+
+    <item
+        android:id="@+id/expense"
+        android:icon="@drawable/expense"
+        android:title="Troškovi" />
+
+    <item
+        android:id="@+id/reports"
+        android:icon="@drawable/reports"
+        android:title="Izvještaji" />
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/settings"
+        android:title="Postavke" />
+    <item
+        android:id="@+id/logout"
+        android:icon="@drawable/ic_logout"
+        android:title="Odjava" />
+</menu>

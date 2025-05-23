@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "712178023310",
+    "firebase_url": "https://auof-5ec3a-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "auof-5ec3a",
+    "storage_bucket": "auof-5ec3a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:712178023310:android:0c3c6b664775f6a8b542df",
+        "android_client_info": {
+          "package_name": "ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "712178023310-do2gu0s2rk25jhgg7qimuov6eqnj7h56.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama",
+            "certificate_hash": "70075a0604316fa8e36798988d796d9786fcb1ec"
+          }
+        },
+        {
+          "client_id": "712178023310-qvavgc0vkifccbf59qld1fnhur2ogjm6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDC4ODAFtT1Vf_BuigFjQUefZBgkrcZREU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "712178023310-qvavgc0vkifccbf59qld1fnhur2ogjm6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
