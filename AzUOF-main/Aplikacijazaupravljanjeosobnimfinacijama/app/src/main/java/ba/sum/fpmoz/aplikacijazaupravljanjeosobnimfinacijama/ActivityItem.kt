@@ -4,11 +4,14 @@ data class ActivityItem(
     var id: String = "",
     var userId: String = "",
     var type: String = "",
-    var description: String = "",
-    var amount: Double = 0.0,
-    var details: String = ""
+    var naziv: String = "",
+    var amount: Double = 0.0,   // amount sada Double
+    var opis: String = "",
+    var datum: String = "",
+    var kategorija: String = ""
 ) {
-    // Empty constructor je potreban za Firebase
-    constructor() : this("", "", "", "", 0.0, "")
+    companion object {
+        const val TYPE_INCOME = "income"
+        const val TYPE_EXPENSE = "expense"
+    }
 }
-

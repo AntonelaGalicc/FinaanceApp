@@ -83,7 +83,7 @@ class HomeActivity : AppCompatActivity() {
                 R.id.dashboard -> Toast.makeText(this, "Početna", Toast.LENGTH_SHORT).show()
                 R.id.income -> startActivity(Intent(this, IncomeActivity::class.java))
                 R.id.expense -> startActivity(Intent(this, ExpenseActivity::class.java))
-                R.id.settings -> Toast.makeText(this, "Postavke", Toast.LENGTH_SHORT).show()
+
                 R.id.logout -> {
                     auth.signOut()
                     Toast.makeText(this, "Odjavljeni ste", Toast.LENGTH_SHORT).show()

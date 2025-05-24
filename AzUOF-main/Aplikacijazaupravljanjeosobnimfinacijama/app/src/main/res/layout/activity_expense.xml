@@ -11,77 +11,125 @@
     tools:context=".ExpenseActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbarExpense"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#2196F3"
-        android:title="Dodaj Trošak"
-        android:titleTextColor="#FFFFFF" />
+        android:background="#1565C0"
+        app:title="Troškovi"
+        app:titleTextColor="@android:color/black"
+        android:elevation="4dp"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:hint="Naziv troška"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="#1565C0"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editNazivTrosak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Naziv troška">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editNazivTrosak"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Iznos">
+        android:hint="Iznos"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="#1565C0"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editIznosTrosak"
             android:inputType="numberDecimal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Opis">
+        android:layout_marginTop="12dp"
+        android:hint="Opis"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="#1565C0"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editOpisTrosak"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Datum">
+        android:layout_marginTop="12dp"
+        android:hint="Datum"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="#1565C0"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editDatumTrosak"
             android:focusable="false"
             android:clickable="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="Kategorija">
+        android:layout_marginTop="12dp"
+        android:hint="Kategorija"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeColor="#1565C0"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <AutoCompleteTextView
             android:id="@+id/spinnerKategorijaTrosak"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="false"
-            android:clickable="true"
-            android:padding="12dp" />
+            android:padding="12dp"
+            android:textColor="#212121"
+            android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -89,17 +137,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Dodaj trošak"
-        android:layout_marginTop="12dp"
-        android:textColor="#FFFFFF"
-        app:backgroundTint="#2196F3" />
+        android:layout_marginTop="20dp"
+        android:textColor="@android:color/white"
+        app:backgroundTint="#1565C0"
+        app:cornerRadius="12dp"
+        android:elevation="4dp"
+        android:padding="14dp" />
 
-    <!-- Ovdje zamjena ScrollView + LinearLayout s RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTroskovi"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:contentDescription="Lista unesenih troškova" />
 
 </LinearLayout>

@@ -46,8 +46,8 @@ class IncomeActivity : AppCompatActivity() {
         btnDodaj = findViewById(R.id.btnDodaj)
         recyclerView = findViewById(R.id.recyclerView)
 
-        // Firebase reference
-        database = FirebaseDatabase.getInstance().getReference("prihodi")
+        // Firebase reference - spremamo prihode u "activities" kao i ostali troškovi
+        database = FirebaseDatabase.getInstance().getReference("activities")
 
         // Initialize adapter with delete callback
         adapter = ActivityAdapter(prihodi) { prihod ->
@@ -74,48 +74,36 @@ class IncomeActivity : AppCompatActivity() {
         // Add new income on button click
         btnDodaj.setOnClickListener {
             val naziv = editNaziv.text.toString().trim()
-            val iznos = editIznos.text.toString().trim()
+            val iznosStr = editIznos.text.toString().trim()
             val opis = editOpis.text.toString().trim()
 
-            if (naziv.isEmpty() || iznos.isEmpty() || opis.isEmpty()) {
-                Toast.makeText(this, "Popunite sva polja!", Toast.LENGTH_SHORT).show()
+            if (naziv.isEmpty() || iznosStr.isEmpty()) {
+                Toast.makeText(this, "Popunite naziv i iznos!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val amountDouble = iznos.toDoubleOrNull()
-            if (amountDouble == null) {
-                Toast.makeText(this, "Neispravan iznos!", Toast.LENGTH_SHORT).show()
+            val amountDouble = iznosStr.toDoubleOrNull()
+            if (amountDouble == null || amountDouble <= 0) {
+                Toast.makeText(this, "Unesite ispravan iznos!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val id = database.push().key ?: ""
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
-            // amount sada ide kao Double
             val prihod = ActivityItem(
                 id = id,
                 userId = currentUserId,
-                type = "Prihod",
-                description = naziv,
-                amount = amountDouble,
-                details = opis
+                type = ActivityItem.TYPE_INCOME, // obično 1
+                naziv = naziv,
+                amount = amountDouble,  // OVDJE: saljemo kao Double, ne kao String
+                opis = opis,
+                datum = "",          // Ako nemate datum, možete ostaviti prazno ili postaviti trenutno vrijeme
+                kategorija = ""      // Ako kategorija nije potrebna, ostavite prazno
             )
 
             database.child(id).setValue(prihod).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Dodaj u "aktivnosti" isto sa userId i amount kao Double
-                    val aktivnostiRef = FirebaseDatabase.getInstance().getReference("aktivnosti")
-                    val activityId = aktivnostiRef.push().key ?: ""
-                    val activityItem = mapOf(
-                        "id" to activityId,
-                        "userId" to currentUserId,
-                        "type" to "Prihod",
-                        "description" to naziv,
-                        "amount" to amountDouble,
-                        "details" to opis
-                    )
-                    aktivnostiRef.child(activityId).setValue(activityItem)
-
                     Toast.makeText(this, "Prihod dodan!", Toast.LENGTH_SHORT).show()
                     editNaziv.text?.clear()
                     editIznos.text?.clear()
@@ -125,7 +113,6 @@ class IncomeActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -137,37 +124,24 @@ class IncomeActivity : AppCompatActivity() {
     }
 
     private fun ucitajPrihodeIzFirebase() {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                prihodi.clear()
-                for (child in snapshot.children) {
-                    val prihodRaw = child.value as? Map<*, *>
-                    if (prihodRaw != null) {
-                        val amountAny = prihodRaw["amount"]
-                        val amountDouble = when (amountAny) {
-                            is Double -> amountAny
-                            is Long -> amountAny.toDouble()
-                            is String -> amountAny.toDoubleOrNull() ?: 0.0
-                            else -> 0.0
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        database.orderByChild("userId").equalTo(currentUserId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    prihodi.clear()
+                    for (child in snapshot.children) {
+                        val item = child.getValue(ActivityItem::class.java)
+                        if (item != null && item.type == ActivityItem.TYPE_INCOME) {
+                            item.id = child.key ?: ""
+                            prihodi.add(item)
                         }
-                        val prihod = ActivityItem(
-                            id = prihodRaw["id"] as? String ?: "",
-                            userId = prihodRaw["userId"] as? String ?: "",
-                            type = prihodRaw["type"] as? String ?: "",
-                            description = prihodRaw["description"] as? String ?: "",
-                            amount = amountDouble,
-                            details = prihodRaw["details"] as? String ?: ""
-                        )
-                        prihodi.add(prihod)
                     }
+                    adapter.notifyDataSetChanged()
                 }
-                adapter.notifyDataSetChanged()
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@IncomeActivity, "Greška: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@IncomeActivity, "Greška: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
-
 }

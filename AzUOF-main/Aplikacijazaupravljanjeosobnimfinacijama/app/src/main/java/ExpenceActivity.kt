@@ -1,8 +1,8 @@
 package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
 import android.app.DatePickerDialog
-import android.graphics.Color
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Toast
@@ -15,209 +15,175 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.util.*
+import android.graphics.Color
+
 
 class ExpenseActivity : AppCompatActivity() {
 
-    private lateinit var editNazivTrosak: TextInputEditText
-    private lateinit var editIznosTrosak: TextInputEditText
-    private lateinit var editOpisTrosak: TextInputEditText
-    private lateinit var editDatumTrosak: TextInputEditText
-    private lateinit var spinnerKategorijaTrosak: AutoCompleteTextView
-    private lateinit var btnDodajTrosak: MaterialButton
-    private lateinit var recyclerViewTroskovi: RecyclerView
-
-    private val troskovi = mutableListOf<ExpenseItem>()
-    private lateinit var adapter: ExpenseAdapter
-    private lateinit var database: DatabaseReference
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
+    private lateinit var activityAdapter: ActivityAdapter
+    private val activityList = mutableListOf<ActivityItem>()
+
+    private lateinit var editNaziv: TextInputEditText
+    private lateinit var editIznos: TextInputEditText
+    private lateinit var editOpis: TextInputEditText
+    private lateinit var editDatum: TextInputEditText
+    private lateinit var spinnerKategorija: AutoCompleteTextView
+    private lateinit var btnDodaj: MaterialButton
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_expense)
 
-        auth = FirebaseAuth.getInstance()
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            Toast.makeText(this, "Niste prijavljeni!", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+        // Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbarExpense)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            title = "Troškovi"
+            setDisplayHomeAsUpEnabled(true) // prikazuje defaultnu strelicu
         }
 
-        setupToolbar()
-        initUI()
-
-        btnDodajTrosak.setBackgroundColor(Color.parseColor("#2196F3"))
-        btnDodajTrosak.setTextColor(Color.WHITE)
-
-        setupDatePicker()
-        setupKategorijaSpinner()
-        postaviZadaniDatum()
-
-        adapter = ExpenseAdapter(troskovi) { expenseToDelete ->
-            obrisiTrosak(expenseToDelete)
-        }
-
-        recyclerViewTroskovi.layoutManager = LinearLayoutManager(this)
-        recyclerViewTroskovi.adapter = adapter
-
-        database = FirebaseDatabase.getInstance()
-            .getReference("troskovi")
-            .child(currentUser.uid)
-
-        loadTroskovi()
-
-        btnDodajTrosak.setOnClickListener {
-            dodajTrosak()
-        }
-    }
-
-    private fun setupToolbar() {
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setBackgroundColor(Color.parseColor("#2196F3"))
-        toolbar.setTitleTextColor(Color.WHITE)
+// Oboji strelicu u bijelo:
         toolbar.navigationIcon?.setTint(Color.WHITE)
 
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        supportActionBar?.title = "Troškovi"
 
-        toolbar.setNavigationOnClickListener { finish() }
-    }
+        auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance().reference
 
-    private fun initUI() {
-        editNazivTrosak = findViewById(R.id.editNazivTrosak)
-        editIznosTrosak = findViewById(R.id.editIznosTrosak)
-        editOpisTrosak = findViewById(R.id.editOpisTrosak)
-        editDatumTrosak = findViewById(R.id.editDatumTrosak)
-        spinnerKategorijaTrosak = findViewById(R.id.spinnerKategorijaTrosak)
-        btnDodajTrosak = findViewById(R.id.btnDodajTrosak)
-        recyclerViewTroskovi = findViewById(R.id.recyclerViewTroskovi)
-    }
+        // UI komponente
+        editNaziv = findViewById(R.id.editNazivTrosak)
+        editIznos = findViewById(R.id.editIznosTrosak)
+        editOpis = findViewById(R.id.editOpisTrosak)
+        editDatum = findViewById(R.id.editDatumTrosak)
+        spinnerKategorija = findViewById(R.id.spinnerKategorijaTrosak)
+        btnDodaj = findViewById(R.id.btnDodajTrosak)
+        recyclerView = findViewById(R.id.recyclerViewTroskovi)
 
-    private fun setupDatePicker() {
-        editDatumTrosak.setOnClickListener {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        activityAdapter = ActivityAdapter(activityList) { deleteActivity(it) }
+        recyclerView.adapter = activityAdapter
+
+        // Kategorije
+        val kategorije = listOf("Hrana", "Stanarina", "Transport", "Zabava", "Ostalo")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, kategorije)
+        spinnerKategorija.setAdapter(adapter)
+        spinnerKategorija.setOnClickListener { spinnerKategorija.showDropDown() }
+
+        // Datum
+        editDatum.setOnClickListener {
             val c = Calendar.getInstance()
-            val trenutniDatum = editDatumTrosak.text.toString()
-            if (trenutniDatum.isNotEmpty()) {
-                try {
-                    val parts = trenutniDatum.split(".")
-                    if (parts.size == 3) {
-                        val dan = parts[0].toInt()
-                        val mjesec = parts[1].toInt() - 1
-                        val godina = parts[2].toInt()
-                        c.set(godina, mjesec, dan)
-                    }
-                } catch (e: Exception) {
-                    // ignoriraj grešku
-                }
-            }
-            val year = c.get(Calendar.YEAR)
-            val month = c.get(Calendar.MONTH)
-            val day = c.get(Calendar.DAY_OF_MONTH)
-
-            val dpd = DatePickerDialog(this, android.R.style.Theme_Holo_Light_Dialog_MinWidth, { _, y, m, d ->
-                val mjesec = m + 1
-                val datumStr = String.format("%02d.%02d.%d", d, mjesec, y)
-                editDatumTrosak.setText(datumStr)
-            }, year, month, day)
-
-            dpd.window?.setBackgroundDrawableResource(android.R.color.transparent)
-            dpd.setOnShowListener {
-                dpd.getButton(DatePickerDialog.BUTTON_POSITIVE)?.setTextColor(Color.parseColor("#2196F3"))
-                dpd.getButton(DatePickerDialog.BUTTON_NEGATIVE)?.setTextColor(Color.parseColor("#2196F3"))
-            }
-
+            val dpd = DatePickerDialog(this, { _, year, month, day ->
+                val formatted = String.format("%02d.%02d.%04d", day, month + 1, year)
+                editDatum.setText(formatted)
+            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
             dpd.show()
         }
+
+        btnDodaj.setOnClickListener { addExpense() }
+
+        fetchExpenses()
     }
 
-    private fun setupKategorijaSpinner() {
-        val kategorije = listOf("Hrana", "Prijevoz", "Stanovanje", "Zabava", "Ostalo")
-        val adapterSpinner = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, kategorije)
-        spinnerKategorijaTrosak.setAdapter(adapterSpinner)
-        spinnerKategorijaTrosak.keyListener = null // korisnik ne može tipkati, samo birati
-        spinnerKategorijaTrosak.setOnClickListener {
-            spinnerKategorijaTrosak.showDropDown()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun postaviZadaniDatum() {
-        val danas = Calendar.getInstance()
-        val datumStr = String.format(
-            "%02d.%02d.%d",
-            danas.get(Calendar.DAY_OF_MONTH),
-            danas.get(Calendar.MONTH) + 1,
-            danas.get(Calendar.YEAR)
-        )
-        editDatumTrosak.setText(datumStr)
-    }
+    private fun addExpense() {
+        val naziv = editNaziv.text.toString().trim()
+        val iznosStr = editIznos.text.toString().trim()
+        val opis = editOpis.text.toString().trim()
+        val datum = editDatum.text.toString().trim()
+        val kategorija = spinnerKategorija.text.toString().trim()
 
-    private fun loadTroskovi() {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val listaTroskova = mutableListOf<ExpenseItem>()
-                for (child in snapshot.children) {
-                    val trosak = child.getValue(ExpenseItem::class.java)
-                    trosak?.let { listaTroskova.add(it) }
-                }
-                troskovi.clear()
-                troskovi.addAll(listaTroskova)
-                adapter.updateData(troskovi)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@ExpenseActivity, "Greška: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun dodajTrosak() {
-        val naziv = editNazivTrosak.text.toString().trim()
-        val iznosStr = editIznosTrosak.text.toString().trim()
-        val opis = editOpisTrosak.text.toString().trim()
-        val datum = editDatumTrosak.text.toString().trim()
-        val kategorija = spinnerKategorijaTrosak.text.toString().trim()
-
-        if (naziv.isEmpty() || iznosStr.isEmpty() || opis.isEmpty() || datum.isEmpty() || kategorija.isEmpty()) {
+        if (naziv.isEmpty() || iznosStr.isEmpty() || datum.isEmpty() || kategorija.isEmpty()) {
             Toast.makeText(this, "Popunite sva polja!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val iznos = iznosStr.toDoubleOrNull()
-        if (iznos == null) {
+        val iznosDouble = iznosStr.toDoubleOrNull()
+        if (iznosDouble == null || iznosDouble <= 0) {
             Toast.makeText(this, "Unesite ispravan iznos!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val id = database.push().key ?: ""
-        val noviTrosak = ExpenseItem(id, naziv, iznos, opis, datum, kategorija)
+        val id = database.child("activities").push().key ?: run {
+            Toast.makeText(this, "Neuspješan pokušaj dodavanja", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val userId = auth.currentUser?.uid ?: run {
+            Toast.makeText(this, "Niste prijavljeni!", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        database.child(id).setValue(noviTrosak).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(this, "Trošak dodan!", Toast.LENGTH_SHORT).show()
-                ocistiPolja()
-            } else {
-                Toast.makeText(this, "Greška prilikom dodavanja troška", Toast.LENGTH_SHORT).show()
-            }
+        val noviTrosak = ActivityItem(
+            id = id,
+            userId = userId,
+            type = ActivityItem.TYPE_EXPENSE,
+            naziv = naziv,
+            amount = iznosDouble,
+            opis = opis,
+            datum = datum,
+            kategorija = kategorija
+        )
+
+        database.child("activities").child(id).setValue(noviTrosak).addOnSuccessListener {
+            Toast.makeText(this, "Trošak dodan!", Toast.LENGTH_SHORT).show()
+            clearInputs()
+            fetchExpenses()
+        }.addOnFailureListener {
+            Toast.makeText(this, "Greška pri dodavanju!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun ocistiPolja() {
-        editNazivTrosak.text?.clear()
-        editIznosTrosak.text?.clear()
-        editOpisTrosak.text?.clear()
-        postaviZadaniDatum()
-        spinnerKategorijaTrosak.text.clear()
+    private fun clearInputs() {
+        editNaziv.text?.clear()
+        editIznos.text?.clear()
+        editOpis.text?.clear()
+        editDatum.text?.clear()
+        spinnerKategorija.setText("")
     }
 
-    private fun obrisiTrosak(trosak: ExpenseItem) {
-        database.child(trosak.id).removeValue().addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Toast.makeText(this, "Trošak obrisan", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Greška prilikom brisanja", Toast.LENGTH_SHORT).show()
-            }
+    private fun fetchExpenses() {
+        val userId = auth.currentUser?.uid ?: run {
+            Toast.makeText(this, "Niste prijavljeni!", Toast.LENGTH_SHORT).show()
+            return
+        }
+        database.child("activities")
+            .orderByChild("userId")
+            .equalTo(userId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    activityList.clear()
+                    for (child in snapshot.children) {
+                        val item = child.getValue(ActivityItem::class.java)
+                        if (item != null && item.type == ActivityItem.TYPE_EXPENSE) {
+                            item.id = child.key ?: ""
+                            activityList.add(item)
+                        }
+                    }
+                    activityAdapter.updateList(activityList)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@ExpenseActivity, "Greška pri dohvaćanju!", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+    private fun deleteActivity(activity: ActivityItem) {
+        database.child("activities").child(activity.id).removeValue().addOnSuccessListener {
+            Toast.makeText(this, "Trošak obrisan", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener {
+            Toast.makeText(this, "Brisanje nije uspjelo", Toast.LENGTH_SHORT).show()
         }
     }
 }

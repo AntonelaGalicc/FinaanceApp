@@ -1,5 +1,6 @@
 package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,44 +13,70 @@ class ActivityAdapter(
     private val onDeleteClick: (ActivityItem) -> Unit
 ) : RecyclerView.Adapter<ActivityAdapter.ActivityViewHolder>() {
 
+    companion object {
+        private const val TYPE_EXPENSE = 0
+        private const val TYPE_INCOME = 1
+    }
+
     inner class ActivityViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtNaziv: TextView = view.findViewById(R.id.textNaziv)
         val txtZnak: TextView = view.findViewById(R.id.textZnak)
         val txtIznos: TextView = view.findViewById(R.id.textIznos)
         val txtOpis: TextView = view.findViewById(R.id.textOpis)
+        val txtDatum: TextView? = view.findViewById(R.id.textDatum)       // Nullable jer prihod kartica nema datuma
+        val txtKategorija: TextView? = view.findViewById(R.id.textKategorija) // Nullable isto
         val btnObrisi: ImageButton = view.findViewById(R.id.btnObrisi)
     }
 
+    override fun getItemViewType(position: Int): Int {
+        // Vrati tip kao int za adapter (0 za trošak, 1 za prihod)
+        return if (activities[position].type == ActivityItem.TYPE_EXPENSE) TYPE_EXPENSE else TYPE_INCOME
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActivityViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.prihod_kartica, parent, false)
+        val layout = if (viewType == TYPE_EXPENSE) {
+            R.layout.item_trosak
+        } else {
+            R.layout.prihod_kartica
+        }
+        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
         return ActivityViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ActivityViewHolder, position: Int) {
         val item = activities[position]
 
-        // Postavi opis kao naziv aktivnosti
-        holder.txtNaziv.text = item.description
+        // Naziv prikazi ili ako nema naziv, onda opiši
+        holder.txtNaziv.text = if (item.naziv.isNotEmpty()) item.naziv else item.opis
+        holder.txtOpis.text = if (item.opis.isNotEmpty()) item.opis else "-"
 
-        // Postavi znak i boju ovisno o iznosu
-        if (item.amount < 0) {
+        if (item.type == ActivityItem.TYPE_EXPENSE) {
+            // Trošak - crvena boja i znak minus
             holder.txtZnak.text = "-"
-            holder.txtZnak.setTextColor(android.graphics.Color.parseColor("#FF5252")) // crvena
-            holder.txtIznos.setTextColor(android.graphics.Color.parseColor("#FF5252"))
+            holder.txtZnak.setTextColor(Color.parseColor("#FF5252"))
+            holder.txtIznos.setTextColor(Color.parseColor("#FF5252"))
+
+            holder.txtDatum?.visibility = View.VISIBLE
+            holder.txtDatum?.text = item.datum
+
+            holder.txtKategorija?.visibility = View.VISIBLE
+            holder.txtKategorija?.text = item.kategorija
+
         } else {
+            // Prihod - zelena boja i znak plus
             holder.txtZnak.text = "+"
-            holder.txtZnak.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // zelena
-            holder.txtIznos.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+            holder.txtZnak.setTextColor(Color.parseColor("#4CAF50"))
+            holder.txtIznos.setTextColor(Color.parseColor("#4CAF50"))
+
+            // Sakrij datum i kategoriju jer ih prihod kartica nema
+            holder.txtDatum?.visibility = View.GONE
+            holder.txtKategorija?.visibility = View.GONE
         }
 
-        // Iznos sa 2 decimale i bez znaka, jer je znak u posebnom TextViewu
+        // Prikaz iznosa s dvije decimale i oznakom KM
         holder.txtIznos.text = String.format("%.2f KM", kotlin.math.abs(item.amount))
 
-        // Detalji (može biti datum, dodatni opis itd.)
-        holder.txtOpis.text = item.details
-
-        // Klik na gumb za brisanje
+        // Delete button poziv callback funkcije
         holder.btnObrisi.setOnClickListener {
             onDeleteClick(item)
         }

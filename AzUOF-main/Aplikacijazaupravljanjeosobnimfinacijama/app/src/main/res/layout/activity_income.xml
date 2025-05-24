@@ -1,77 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="24dp"
+    android:background="#FAFAFA">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#2196F3"
-        android:titleTextColor="@android:color/white" />
+        android:background="#1976D2"
+        android:title="Prihod"
+        android:titleTextColor="@android:color/white"
+        android:elevation="4dp"/>
 
-    <!-- Input polja i gumb -->
+    <!-- Naziv input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:hint="Naziv">
+        android:layout_marginTop="24dp"
+        android:hint="Naziv prihoda"
+        app:errorEnabled="true"
+        app:boxStrokeColor="#1976D2"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editNaziv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Iznos input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:hint="Iznos">
+        android:layout_marginTop="16dp"
+        android:hint="Iznos"
+        app:errorEnabled="true"
+        app:boxStrokeColor="#1976D2"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editIznos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Opis input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:hint="Opis">
+        android:layout_marginTop="16dp"
+        android:hint="Opis (opcionalno)"
+        app:boxStrokeColor="#1976D2"
+        app:boxBackgroundMode="outline"
+        app:boxStrokeWidth="2dp"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editOpis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
-            android:minLines="2" />
+            android:minLines="3"
+            android:maxLines="5"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:padding="12dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Dodaj gumb -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDodaj"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="Dodaj prihod"
-        android:backgroundTint="#2196F3"
-        android:textColor="@android:color/white" />
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#1976D2"
+        android:elevation="4dp"
+        app:cornerRadius="12dp"
+        android:padding="14dp"/>
 
-    <!-- RecyclerView zauzima preostali prostor -->
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
         android:layout_weight="1"
-        tools:ignore="SpeakableTextPresentCheck" />
+        android:layout_marginTop="24dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
 
 </LinearLayout>

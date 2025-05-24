@@ -24,6 +24,17 @@
             android:accessibilityHeading="true" />
 
         <TextView
+            android:id="@+id/textZnak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:paddingEnd="4dp" />
+
+        <TextView
             android:id="@+id/textIznos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
