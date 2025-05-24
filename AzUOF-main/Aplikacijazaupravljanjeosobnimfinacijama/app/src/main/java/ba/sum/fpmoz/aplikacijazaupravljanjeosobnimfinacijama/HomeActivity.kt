@@ -2,6 +2,7 @@ package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -13,12 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.database.*
 
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private lateinit var btnMenu: ImageButton
@@ -29,12 +29,13 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var activityAdapter: ActivityAdapter
     private val activities = mutableListOf<ActivityItem>()
 
+    private lateinit var database: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_navbar)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
 
         drawerLayout = findViewById(R.id.drawer_layout)
         navView = findViewById(R.id.nav_view)
@@ -61,17 +62,18 @@ class HomeActivity : AppCompatActivity() {
         progressConsumption.max = 100
         progressConsumption.progress = 65
 
-        // Postavljanje RecyclerView-a i adaptera sa lambda funkcijom za brisanje
+        // RecyclerView setup
         rvActivities.layoutManager = LinearLayoutManager(this)
         activityAdapter = ActivityAdapter(activities) { activityItem ->
             deleteActivity(activityItem)
         }
         rvActivities.adapter = activityAdapter
 
-        // Učitaj aktivnosti korisnika iz Firestore
+        database = FirebaseDatabase.getInstance().getReference("aktivnosti")
+
+        // Učitaj aktivnosti iz Firebase Realtime Database s filtriranjem po userId
         loadUserActivities()
 
-        // Otvaranje drawer menija
         btnMenu.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
         }
@@ -97,28 +99,38 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun loadUserActivities() {
-        val userId = auth.currentUser?.uid ?: return
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            Toast.makeText(this, "Korisnik nije prijavljen", Toast.LENGTH_SHORT).show()
+            Log.e("HomeActivity", "User not logged in")
+            return
+        }
+        Log.d("HomeActivity", "Trenutni korisnik UID: $userId")
 
-        db.collection("activities")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { documents ->
-                activities.clear()
-                activities.addAll(documents.mapNotNull { it.toObject(ActivityItem::class.java) })
-                activityAdapter.notifyDataSetChanged()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Greška pri dohvaćanju aktivnosti", Toast.LENGTH_SHORT).show()
-            }
+        // Query s filtriranjem direktno na Firebase strani
+        database.orderByChild("userId").equalTo(userId)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    activities.clear()
+                    for (child in snapshot.children) {
+                        val activityItem = child.getValue(ActivityItem::class.java)
+                        activityItem?.let { activities.add(it) }
+                    }
+                    activityAdapter.notifyDataSetChanged()
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@HomeActivity, "Greška pri učitavanju aktivnosti: ${error.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("HomeActivity", "Database error: ${error.message}")
+                }
+            })
     }
 
     private fun deleteActivity(activityItem: ActivityItem) {
-        db.collection("activities")
-            .document(activityItem.id)
-            .delete()
+        database.child(activityItem.id).removeValue()
             .addOnSuccessListener {
                 Toast.makeText(this, "Aktivnost obrisana", Toast.LENGTH_SHORT).show()
-                loadUserActivities()
+                // Nema potrebe pozivati ponovo loadUserActivities() jer event listener prati promjene
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Greška pri brisanju aktivnosti", Toast.LENGTH_SHORT).show()

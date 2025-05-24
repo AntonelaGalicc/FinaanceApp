@@ -1,11 +1,14 @@
 package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
 data class ActivityItem(
-    val id: String = "",
-    val type: String = "",          // "Prihod" ili "Rashod"
-    val description: String = "",   // Ovo će biti Naziv
-    val amount: String = "",        // Iznos
-    val details: String = "",       // Opis (dodaj ovo polje za opis)
-    val userId: String = ""
-)
+    var id: String = "",
+    var userId: String = "",
+    var type: String = "",
+    var description: String = "",
+    var amount: Double = 0.0,
+    var details: String = ""
+) {
+    // Empty constructor je potreban za Firebase
+    constructor() : this("", "", "", "", 0.0, "")
+}
 

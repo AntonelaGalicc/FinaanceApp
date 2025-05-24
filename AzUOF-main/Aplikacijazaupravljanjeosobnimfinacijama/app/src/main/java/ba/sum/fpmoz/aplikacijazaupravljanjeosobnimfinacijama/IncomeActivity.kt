@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 
 class IncomeActivity : AppCompatActivity() {
@@ -49,17 +50,20 @@ class IncomeActivity : AppCompatActivity() {
         database = FirebaseDatabase.getInstance().getReference("prihodi")
 
         // Initialize adapter with delete callback
-        adapter = ActivityAdapter(prihodi,
-            onDeleteClick = { prihod ->
-                database.child(prihod.id).removeValue().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Prihod obrisan", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this, "Greška prilikom brisanja", Toast.LENGTH_SHORT).show()
+        adapter = ActivityAdapter(prihodi) { prihod ->
+            database.child(prihod.id).removeValue().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val index = prihodi.indexOfFirst { it.id == prihod.id }
+                    if (index != -1) {
+                        prihodi.removeAt(index)
+                        adapter.notifyItemRemoved(index)
                     }
+                    Toast.makeText(this, "Prihod obrisan", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Greška prilikom brisanja", Toast.LENGTH_SHORT).show()
                 }
             }
-        )
+        }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -78,25 +82,36 @@ class IncomeActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            val amountDouble = iznos.toDoubleOrNull()
+            if (amountDouble == null) {
+                Toast.makeText(this, "Neispravan iznos!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val id = database.push().key ?: ""
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+            // amount sada ide kao Double
             val prihod = ActivityItem(
                 id = id,
+                userId = currentUserId,
                 type = "Prihod",
                 description = naziv,
-                amount = iznos,
+                amount = amountDouble,
                 details = opis
             )
 
             database.child(id).setValue(prihod).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Dodaj u "aktivnosti"
+                    // Dodaj u "aktivnosti" isto sa userId i amount kao Double
                     val aktivnostiRef = FirebaseDatabase.getInstance().getReference("aktivnosti")
                     val activityId = aktivnostiRef.push().key ?: ""
                     val activityItem = mapOf(
                         "id" to activityId,
+                        "userId" to currentUserId,
                         "type" to "Prihod",
                         "description" to naziv,
-                        "amount" to "+$iznos KM",
+                        "amount" to amountDouble,
                         "details" to opis
                     )
                     aktivnostiRef.child(activityId).setValue(activityItem)
@@ -110,6 +125,7 @@ class IncomeActivity : AppCompatActivity() {
                 }
             }
         }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -125,8 +141,25 @@ class IncomeActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 prihodi.clear()
                 for (child in snapshot.children) {
-                    val prihod = child.getValue(ActivityItem::class.java)
-                    prihod?.let { prihodi.add(it) }
+                    val prihodRaw = child.value as? Map<*, *>
+                    if (prihodRaw != null) {
+                        val amountAny = prihodRaw["amount"]
+                        val amountDouble = when (amountAny) {
+                            is Double -> amountAny
+                            is Long -> amountAny.toDouble()
+                            is String -> amountAny.toDoubleOrNull() ?: 0.0
+                            else -> 0.0
+                        }
+                        val prihod = ActivityItem(
+                            id = prihodRaw["id"] as? String ?: "",
+                            userId = prihodRaw["userId"] as? String ?: "",
+                            type = prihodRaw["type"] as? String ?: "",
+                            description = prihodRaw["description"] as? String ?: "",
+                            amount = amountDouble,
+                            details = prihodRaw["details"] as? String ?: ""
+                        )
+                        prihodi.add(prihod)
+                    }
                 }
                 adapter.notifyDataSetChanged()
             }
@@ -136,4 +169,5 @@ class IncomeActivity : AppCompatActivity() {
             }
         })
     }
+
 }

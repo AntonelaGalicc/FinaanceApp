@@ -8,12 +8,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class ActivityAdapter(
-    private val activities: List<ActivityItem>,
+    private val activities: MutableList<ActivityItem>,
     private val onDeleteClick: (ActivityItem) -> Unit
 ) : RecyclerView.Adapter<ActivityAdapter.ActivityViewHolder>() {
 
     inner class ActivityViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val txtNaziv: TextView = view.findViewById(R.id.textNaziv)
+        val txtZnak: TextView = view.findViewById(R.id.textZnak)
         val txtIznos: TextView = view.findViewById(R.id.textIznos)
         val txtOpis: TextView = view.findViewById(R.id.textOpis)
         val btnObrisi: ImageButton = view.findViewById(R.id.btnObrisi)
@@ -28,15 +29,37 @@ class ActivityAdapter(
     override fun onBindViewHolder(holder: ActivityViewHolder, position: Int) {
         val item = activities[position]
 
-        // Postavi tekstove iz polja ActivityItem
-        holder.txtNaziv.text = item.description             // koristimo description kao naziv
-        holder.txtIznos.text = "${item.amount} KM"           // amount za iznos
-        holder.txtOpis.text = item.type                       // type koristimo kao dodatni opis (ili promijeni prema potrebi)
+        // Postavi opis kao naziv aktivnosti
+        holder.txtNaziv.text = item.description
 
+        // Postavi znak i boju ovisno o iznosu
+        if (item.amount < 0) {
+            holder.txtZnak.text = "-"
+            holder.txtZnak.setTextColor(android.graphics.Color.parseColor("#FF5252")) // crvena
+            holder.txtIznos.setTextColor(android.graphics.Color.parseColor("#FF5252"))
+        } else {
+            holder.txtZnak.text = "+"
+            holder.txtZnak.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // zelena
+            holder.txtIznos.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+        }
+
+        // Iznos sa 2 decimale i bez znaka, jer je znak u posebnom TextViewu
+        holder.txtIznos.text = String.format("%.2f KM", kotlin.math.abs(item.amount))
+
+        // Detalji (može biti datum, dodatni opis itd.)
+        holder.txtOpis.text = item.details
+
+        // Klik na gumb za brisanje
         holder.btnObrisi.setOnClickListener {
             onDeleteClick(item)
         }
     }
 
     override fun getItemCount(): Int = activities.size
+
+    fun updateList(newList: List<ActivityItem>) {
+        activities.clear()
+        activities.addAll(newList)
+        notifyDataSetChanged()
+    }
 }

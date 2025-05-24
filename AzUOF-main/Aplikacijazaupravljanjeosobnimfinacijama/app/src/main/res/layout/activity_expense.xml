@@ -93,20 +93,13 @@
         android:textColor="#FFFFFF"
         app:backgroundTint="#2196F3" />
 
-    <ScrollView
+    <!-- Ovdje zamjena ScrollView + LinearLayout s RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTroskovi"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="16dp"
-        android:contentDescription="Lista unesenih troškova"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:id="@+id/containerTroskovi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:contentDescription="Lista troškova" />
-    </ScrollView>
+        android:contentDescription="Lista unesenih troškova" />
 
 </LinearLayout>
