@@ -1,5 +1,6 @@
 package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
+import android.annotation.SuppressLint
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.MenuItem
@@ -26,6 +27,7 @@ class IncomeActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var adapter: ActivityAdapter
 
+    @SuppressLint("PrivateResource")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_income)

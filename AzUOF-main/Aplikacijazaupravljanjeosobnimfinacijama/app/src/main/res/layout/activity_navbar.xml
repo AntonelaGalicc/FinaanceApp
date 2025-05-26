@@ -42,8 +42,8 @@
         <!-- Kružni indikator potrošnje sa saldom u sredini -->
         <FrameLayout
             android:id="@+id/frameProgress"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
+            android:layout_width="300sp"
+            android:layout_height="300sp"
             android:layout_below="@id/txtWelcome"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="24dp">
