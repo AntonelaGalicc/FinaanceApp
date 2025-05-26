@@ -39,26 +39,43 @@
             android:gravity="center"
             android:fontFamily="sans-serif-medium" />
 
-        <!-- Kružni indikator potrošnje -->
-        <ProgressBar
-            android:id="@+id/progressConsumption"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+        <!-- Kružni indikator potrošnje sa saldom u sredini -->
+        <FrameLayout
+            android:id="@+id/frameProgress"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
             android:layout_below="@id/txtWelcome"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="24dp"
-            android:max="100"
-            android:progress="65"
-            android:indeterminate="false"
-            android:progressDrawable="@drawable/circular_progress_bar" />
+            android:layout_marginTop="24dp">
+
+            <ProgressBar
+                android:id="@+id/progressConsumption"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progress="65"
+                android:indeterminate="false"
+                android:progressDrawable="@drawable/circular_progress_bar" />
+
+            <TextView
+                android:id="@+id/txtBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Ukupno: 0 KM"
+                android:textColor="#834333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
 
         <!-- Naslov za listu aktivnosti -->
         <TextView
             android:id="@+id/tvActivitiesTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/progressConsumption"
+            android:layout_below="@id/frameProgress"
             android:layout_marginTop="24dp"
             android:text="Posljednje aktivnosti"
             android:textColor="#834333"

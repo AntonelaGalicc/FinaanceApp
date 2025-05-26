@@ -1,6 +1,7 @@
 package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,13 +10,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class ActivityAdapter(
-    private val activities: MutableList<ActivityItem>,
+    private var activities: MutableList<ActivityItem>,
     private val onDeleteClick: (ActivityItem) -> Unit
 ) : RecyclerView.Adapter<ActivityAdapter.ActivityViewHolder>() {
 
     companion object {
-        private const val TYPE_EXPENSE = 0
-        private const val TYPE_INCOME = 1
+        private const val VIEW_TYPE_EXPENSE = 0
+        private const val VIEW_TYPE_INCOME = 1
     }
 
     inner class ActivityViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -23,18 +24,21 @@ class ActivityAdapter(
         val txtZnak: TextView = view.findViewById(R.id.textZnak)
         val txtIznos: TextView = view.findViewById(R.id.textIznos)
         val txtOpis: TextView = view.findViewById(R.id.textOpis)
-        val txtDatum: TextView? = view.findViewById(R.id.textDatum)       // Nullable jer prihod kartica nema datuma
-        val txtKategorija: TextView? = view.findViewById(R.id.textKategorija) // Nullable isto
+        val txtDatum: TextView? = view.findViewById(R.id.textDatum)       // nullable jer prihod kartica nema datum
+        val txtKategorija: TextView? = view.findViewById(R.id.textKategorija) // nullable jer prihod kartica nema kategoriju
         val btnObrisi: ImageButton = view.findViewById(R.id.btnObrisi)
     }
 
     override fun getItemViewType(position: Int): Int {
-        // Vrati tip kao int za adapter (0 za trošak, 1 za prihod)
-        return if (activities[position].type == ActivityItem.TYPE_EXPENSE) TYPE_EXPENSE else TYPE_INCOME
+        return if (activities[position].type == ActivityItem.TYPE_EXPENSE) {
+            VIEW_TYPE_EXPENSE
+        } else {
+            VIEW_TYPE_INCOME
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActivityViewHolder {
-        val layout = if (viewType == TYPE_EXPENSE) {
+        val layout = if (viewType == VIEW_TYPE_EXPENSE) {
             R.layout.item_trosak
         } else {
             R.layout.prihod_kartica
@@ -46,12 +50,12 @@ class ActivityAdapter(
     override fun onBindViewHolder(holder: ActivityViewHolder, position: Int) {
         val item = activities[position]
 
-        // Naziv prikazi ili ako nema naziv, onda opiši
+        // Naziv ili opis
         holder.txtNaziv.text = if (item.naziv.isNotEmpty()) item.naziv else item.opis
         holder.txtOpis.text = if (item.opis.isNotEmpty()) item.opis else "-"
 
         if (item.type == ActivityItem.TYPE_EXPENSE) {
-            // Trošak - crvena boja i znak minus
+            // Trošak - crvena boja i minus znak
             holder.txtZnak.text = "-"
             holder.txtZnak.setTextColor(Color.parseColor("#FF5252"))
             holder.txtIznos.setTextColor(Color.parseColor("#FF5252"))
@@ -63,20 +67,20 @@ class ActivityAdapter(
             holder.txtKategorija?.text = item.kategorija
 
         } else {
-            // Prihod - zelena boja i znak plus
+            // Prihod - zelena boja i plus znak
             holder.txtZnak.text = "+"
             holder.txtZnak.setTextColor(Color.parseColor("#4CAF50"))
             holder.txtIznos.setTextColor(Color.parseColor("#4CAF50"))
 
-            // Sakrij datum i kategoriju jer ih prihod kartica nema
+            // Prihod nema datum i kategoriju
             holder.txtDatum?.visibility = View.GONE
             holder.txtKategorija?.visibility = View.GONE
         }
 
-        // Prikaz iznosa s dvije decimale i oznakom KM
+        // Iznos s dvije decimale i oznakom KM
         holder.txtIznos.text = String.format("%.2f KM", kotlin.math.abs(item.amount))
 
-        // Delete button poziv callback funkcije
+        // Klik na delete dugme
         holder.btnObrisi.setOnClickListener {
             onDeleteClick(item)
         }
@@ -85,8 +89,10 @@ class ActivityAdapter(
     override fun getItemCount(): Int = activities.size
 
     fun updateList(newList: List<ActivityItem>) {
-        activities.clear()
-        activities.addAll(newList)
+        // Zamijeni listu u adapteru novom kopijom nove liste
+        activities = newList.toMutableList()
+        Log.d("ActivityAdapter", "updateList pozvan, item count: ${activities.size}")
         notifyDataSetChanged()
     }
+
 }

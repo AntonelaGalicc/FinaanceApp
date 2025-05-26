@@ -24,6 +24,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var btnMenu: ImageButton
     private lateinit var txtWelcome: TextView
     private lateinit var progressConsumption: ProgressBar
+    private lateinit var txtBalance: TextView
     private lateinit var rvActivities: RecyclerView
 
     private lateinit var activityAdapter: ActivityAdapter
@@ -42,6 +43,7 @@ class HomeActivity : AppCompatActivity() {
         btnMenu = findViewById(R.id.btnMenu)
         txtWelcome = findViewById(R.id.txtWelcome)
         progressConsumption = findViewById(R.id.progressConsumption)
+        txtBalance = findViewById(R.id.txtBalance)
         rvActivities = findViewById(R.id.rvActivities)
 
         // Postavljanje welcome teksta
@@ -52,17 +54,17 @@ class HomeActivity : AppCompatActivity() {
         val userNameToShow = when {
             !displayName.isNullOrEmpty() -> displayName
             !email.isNullOrEmpty() -> email.substringBefore("@")
-            else -> "korisniče"
+            else -> "Korisniče"
         }
 
         val formattedUserName = userNameToShow.replaceFirstChar { it.uppercaseChar() }
-        txtWelcome.text = "Dobrodošao/la, $formattedUserName!"
+        txtWelcome.text = "Pozdrav, $formattedUserName!"
 
         // Postavi kružni indikator potrošnje (primjer: 65%)
         progressConsumption.max = 100
         progressConsumption.progress = 65
 
-        // RecyclerView setup
+        // Inicijalizacija RecyclerView-a za aktivnosti
         rvActivities.layoutManager = LinearLayoutManager(this)
         activityAdapter = ActivityAdapter(activities) { activityItem ->
             deleteActivity(activityItem)
@@ -71,8 +73,11 @@ class HomeActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance().getReference("aktivnosti")
 
-        // Učitaj aktivnosti iz Firebase Realtime Database s filtriranjem po userId
+        // Učitaj aktivnosti korisnika
         loadUserActivities()
+
+        // Učitaj i izračunaj saldo
+        loadUserBalance()
 
         btnMenu.setOnClickListener {
             drawerLayout.openDrawer(GravityCompat.START)
@@ -107,7 +112,7 @@ class HomeActivity : AppCompatActivity() {
         }
         Log.d("HomeActivity", "Trenutni korisnik UID: $userId")
 
-        // Query s filtriranjem direktno na Firebase strani
+        // Dohvati aktivnosti korisnika
         database.orderByChild("userId").equalTo(userId)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -130,11 +135,55 @@ class HomeActivity : AppCompatActivity() {
         database.child(activityItem.id).removeValue()
             .addOnSuccessListener {
                 Toast.makeText(this, "Aktivnost obrisana", Toast.LENGTH_SHORT).show()
-                // Nema potrebe pozivati ponovo loadUserActivities() jer event listener prati promjene
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Greška pri brisanju aktivnosti", Toast.LENGTH_SHORT).show()
             }
+    }
+
+    private fun loadUserBalance() {
+        val userId = auth.currentUser?.uid ?: return
+
+        val incomeRef = FirebaseDatabase.getInstance().getReference("prihodi")
+        val expenseRef = FirebaseDatabase.getInstance().getReference("rashodi")
+
+        var totalIncome = 0.0
+        var totalExpense = 0.0
+
+        // Dohvati prihode korisnika
+        incomeRef.orderByChild("userId").equalTo(userId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    totalIncome = 0.0
+                    for (child in snapshot.children) {
+                        val amount = child.child("amount").getValue(Double::class.java) ?: 0.0
+                        totalIncome += amount
+                    }
+                    // Nakon prihoda dohvatimo rashode
+                    expenseRef.orderByChild("userId").equalTo(userId)
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(expenseSnapshot: DataSnapshot) {
+                                totalExpense = 0.0
+                                for (child in expenseSnapshot.children) {
+                                    val amount = child.child("amount").getValue(Double::class.java) ?: 0.0
+                                    totalExpense += amount
+                                }
+                                // Izračunaj saldo
+                                val saldo = totalIncome - totalExpense
+                                // Prikaži saldo u TextView
+                                txtBalance.text = "Saldo: %.2f KM".format(saldo)
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Toast.makeText(this@HomeActivity, "Greška pri učitavanju rashoda: ${error.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        })
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@HomeActivity, "Greška pri učitavanju prihoda: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     override fun onBackPressed() {

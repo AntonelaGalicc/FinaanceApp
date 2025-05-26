@@ -109,14 +109,17 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editDatumTrosak"
-            android:focusable="false"
-            android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:inputType="none"
             android:textColor="#212121"
             android:textSize="16sp"
             android:padding="12dp" />
     </com.google.android.material.textfield.TextInputLayout>
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
@@ -139,7 +142,8 @@
             android:layout_height="wrap_content"
             android:padding="12dp"
             android:textColor="#212121"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            tools:ignore="TouchTargetSizeCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton

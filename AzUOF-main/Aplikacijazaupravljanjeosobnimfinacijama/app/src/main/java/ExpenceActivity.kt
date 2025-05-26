@@ -1,7 +1,9 @@
 package ba.sum.fpmoz.aplikacijazaupravljanjeosobnimfinacijama
 
 import android.app.DatePickerDialog
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -15,8 +17,6 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import java.util.*
-import android.graphics.Color
-
 
 class ExpenseActivity : AppCompatActivity() {
 
@@ -40,15 +40,11 @@ class ExpenseActivity : AppCompatActivity() {
         // Toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbarExpense)
         setSupportActionBar(toolbar)
-
         supportActionBar?.apply {
             title = "Troškovi"
-            setDisplayHomeAsUpEnabled(true) // prikazuje defaultnu strelicu
+            setDisplayHomeAsUpEnabled(true)
         }
-
-// Oboji strelicu u bijelo:
         toolbar.navigationIcon?.setTint(Color.WHITE)
-
 
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance().reference
@@ -63,7 +59,8 @@ class ExpenseActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewTroskovi)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
-        activityAdapter = ActivityAdapter(activityList) { deleteActivity(it) }
+
+        activityAdapter = ActivityAdapter(mutableListOf()) { deleteActivity(it) }
         recyclerView.adapter = activityAdapter
 
         // Kategorije
@@ -72,15 +69,26 @@ class ExpenseActivity : AppCompatActivity() {
         spinnerKategorija.setAdapter(adapter)
         spinnerKategorija.setOnClickListener { spinnerKategorija.showDropDown() }
 
+        // Onemogući unos teksta
+        spinnerKategorija.keyListener = null
+        spinnerKategorija.setTextColor(Color.BLACK)
+        spinnerKategorija.setBackgroundColor(Color.parseColor("#954535")) // Svijetlo plava
+
         // Datum
         editDatum.setOnClickListener {
             val c = Calendar.getInstance()
             val dpd = DatePickerDialog(this, { _, year, month, day ->
-                val formatted = String.format("%02d.%02d.%04d", day, month + 1, year)
+                val formatted = String.format("%04d-%02d-%02d", year, month + 1, day)
                 editDatum.setText(formatted)
             }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
             dpd.show()
         }
+
+        // Stilizacija polja za datum
+        editDatum.setTextColor(Color.BLACK)
+        editDatum.setBackgroundColor(Color.parseColor("#954535"))
+
+
 
         btnDodaj.setOnClickListener { addExpense() }
 
@@ -138,6 +146,8 @@ class ExpenseActivity : AppCompatActivity() {
         database.child("activities").child(id).setValue(noviTrosak).addOnSuccessListener {
             Toast.makeText(this, "Trošak dodan!", Toast.LENGTH_SHORT).show()
             clearInputs()
+            // fetchExpenses() nije striktno potreban jer ValueEventListener prati promjene,
+            // ali možeš ostaviti za sigurnost:
             fetchExpenses()
         }.addOnFailureListener {
             Toast.makeText(this, "Greška pri dodavanju!", Toast.LENGTH_SHORT).show()
@@ -162,12 +172,18 @@ class ExpenseActivity : AppCompatActivity() {
             .equalTo(userId)
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
+                    Log.d("ExpenseActivity", "Dohvaćeno stavki: ${snapshot.childrenCount}")
                     activityList.clear()
                     for (child in snapshot.children) {
                         val item = child.getValue(ActivityItem::class.java)
+                        Log.d("ExpenseActivity", "Dohvaćena stavka: $item")  // dodano za debug
+                        if (item != null) {
+                            Log.d("ExpenseActivity", "Tip stavke: ${item.type}, ID iz child key: ${child.key}")
+                        }
                         if (item != null && item.type == ActivityItem.TYPE_EXPENSE) {
                             item.id = child.key ?: ""
                             activityList.add(item)
+                            Log.d("ExpenseActivity", "Dodano u listu: ${item.naziv} sa iznosom ${item.amount}")
                         }
                     }
                     activityAdapter.updateList(activityList)
@@ -175,13 +191,16 @@ class ExpenseActivity : AppCompatActivity() {
 
                 override fun onCancelled(error: DatabaseError) {
                     Toast.makeText(this@ExpenseActivity, "Greška pri dohvaćanju!", Toast.LENGTH_SHORT).show()
+                    Log.e("ExpenseActivity", "Database error: ${error.message}")
                 }
             })
     }
 
+
     private fun deleteActivity(activity: ActivityItem) {
         database.child("activities").child(activity.id).removeValue().addOnSuccessListener {
             Toast.makeText(this, "Trošak obrisan", Toast.LENGTH_SHORT).show()
+            fetchExpenses() // Osvježi listu nakon brisanja
         }.addOnFailureListener {
             Toast.makeText(this, "Brisanje nije uspjelo", Toast.LENGTH_SHORT).show()
         }
