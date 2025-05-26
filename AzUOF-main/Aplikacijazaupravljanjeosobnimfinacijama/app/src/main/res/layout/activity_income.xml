@@ -5,14 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="#FAFAFA">
+    android:background="@drawable/prihitrosk">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#1976D2"
+        android:background="#954535"
         android:title="Prihod"
         android:titleTextColor="@android:color/white"
         android:elevation="4dp"/>
@@ -23,8 +23,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:hint="Naziv prihoda"
+        app:hintTextColor="#954535"
         app:errorEnabled="true"
-        app:boxStrokeColor="#1976D2"
+        app:boxStrokeColor="#954535"
         app:boxBackgroundMode="outline"
         app:boxStrokeWidth="2dp"
         app:boxCornerRadiusTopStart="8dp"
@@ -48,8 +49,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Iznos"
+        app:hintTextColor="#954535"
         app:errorEnabled="true"
-        app:boxStrokeColor="#1976D2"
+        app:boxStrokeColor="#954535"
         app:boxBackgroundMode="outline"
         app:boxStrokeWidth="2dp"
         app:boxCornerRadiusTopStart="8dp"
@@ -73,7 +75,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Opis (opcionalno)"
-        app:boxStrokeColor="#1976D2"
+        app:hintTextColor="#954535"
+        app:boxStrokeColor="#954535"
         app:boxBackgroundMode="outline"
         app:boxStrokeWidth="2dp"
         app:boxCornerRadiusTopStart="8dp"
@@ -100,9 +103,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Dodaj prihod"
+        app:hintTextColor="#954535"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:backgroundTint="#1976D2"
+        android:backgroundTint="#954535"
         android:elevation="4dp"
         app:cornerRadius="12dp"
         android:padding="14dp"/>

@@ -5,7 +5,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@drawable/slzapocetnu">
 
     <!-- Glavni sadržaj -->
     <RelativeLayout
@@ -23,7 +23,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Otvori izbornik"
             android:src="@android:drawable/ic_menu_sort_by_size"
-            app:tint="#2196F3" />
+            app:tint="#834333" />
 
         <!-- Pozdravni tekst -->
         <TextView
@@ -33,7 +33,7 @@
             android:layout_below="@id/btnMenu"
             android:layout_marginTop="24dp"
             android:text="Dobrodošao/la, Korisnik!"
-            android:textColor="#2196F3"
+            android:textColor="#834333"
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -61,7 +61,7 @@
             android:layout_below="@id/progressConsumption"
             android:layout_marginTop="24dp"
             android:text="Posljednje aktivnosti"
-            android:textColor="#2196F3"
+            android:textColor="#834333"
             android:textSize="20sp"
             android:textStyle="bold"
             android:paddingStart="8dp" />
@@ -86,7 +86,7 @@
         android:fitsSystemWindows="true"
         app:menu="@menu/drawer_menu"
         android:background="#FFFFFF"
-        app:itemIconTint="#2196F3"
-        app:itemTextColor="#2196F3" />
+        app:itemIconTint="#C19A6B"
+        app:itemTextColor="#C19A6B" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -20,8 +20,8 @@
                 android:useLevel="true"
                 android:innerRadiusRatio="3">
                 <gradient
-                    android:startColor="#2196F3"
-                    android:endColor="#64B5F6"
+                    android:startColor="#834333"
+                    android:endColor="#C19A6B"
                     android:type="sweep"
                     android:useLevel="true" />
             </shape>
