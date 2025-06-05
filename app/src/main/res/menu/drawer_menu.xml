@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/main_group" android:checkableBehavior="single">
+        <item
+            android:id="@+id/dashboard"
+            android:icon="@drawable/dashboard"
+            android:title="Početna"
+            android:orderInCategory="1" />
+
+        <item
+            android:id="@+id/income"
+            android:icon="@drawable/income"
+            android:title="Prihodi"
+            android:orderInCategory="2" />
+
+        <item
+            android:id="@+id/expense"
+            android:icon="@drawable/expense"
+            android:title="Troškovi"
+            android:orderInCategory="3" />
+
+        <item
+            android:id="@+id/ishodi"
+            android:icon="@drawable/reports"
+            android:title="Izvještaji"
+            android:orderInCategory="4" />
+    </group>
+
+    <item
+        android:id="@+id/logout"
+        android:icon="@drawable/ic_logout"
+        android:title="Odjava"
+        android:orderInCategory="100" />
+
+</menu>

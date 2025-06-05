@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/slzapocetnu">
+
+    <!-- Glavni sadržaj -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp">
+
+        <!-- Gumb za otvaranje menija (drawer) -->
+        <ImageButton
+            android:id="@+id/btnMenu"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="34dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Otvori izbornik"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            app:tint="#834333" />
+
+        <!-- Pozdravni tekst -->
+        <TextView
+            android:id="@+id/txtWelcome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnMenu"
+            android:layout_marginTop="24dp"
+            android:text="Dobrodošao/la, Korisnik!"
+            android:textColor="#834333"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- Kružni indikator potrošnje sa saldom u sredini -->
+        <FrameLayout
+            android:id="@+id/frameProgress"
+            android:layout_width="300sp"
+            android:layout_height="300sp"
+            android:layout_below="@id/txtWelcome"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp">
+
+            <ProgressBar
+                android:id="@+id/progressConsumption"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="100"
+                android:progress="65"
+                android:indeterminate="false"
+                android:progressDrawable="@drawable/circular_progress_bar" />
+
+            <TextView
+                android:id="@+id/txtBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Ukupno: 0 KM"
+                android:textColor="#834333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pieChart"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                />
+
+        </FrameLayout>
+
+
+        <!-- Naslov za listu aktivnosti -->
+        <TextView
+            android:id="@+id/tvActivitiesTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/frameProgress"
+            android:layout_marginTop="24dp"
+            android:text="Posljednje aktivnosti"
+            android:textColor="#834333"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingStart="8dp" />
+
+        <!-- RecyclerView za aktivnosti -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvActivities"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/tvActivitiesTitle"
+            android:layout_marginTop="12dp"
+            android:layout_alignParentBottom="true" />
+
+    </RelativeLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:menu="@menu/drawer_menu"
+        android:background="#FFFFFF"
+        app:itemIconTint="#C19A6B"
+        app:itemTextColor="#C19A6B" />
+
+</androidx.drawerlayout.widget.DrawerLayout>
